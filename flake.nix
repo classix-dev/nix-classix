@@ -154,9 +154,9 @@
           {
             safe-multisig = mkSafeMultisig;
             default = mkSafeMultisig;
-            platforms.digital-ocean = ./modules/platforms/digital-ocean;
+            platform-digital-ocean = ./modules/platforms/digital-ocean;
             rpc-cors-proxy = ./modules/rpc-cors-proxy;
-            flavors.classix = mkFlavorClassix;
+            flavor-classix = mkFlavorClassix;
           };
       };
     };
