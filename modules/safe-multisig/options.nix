@@ -41,12 +41,6 @@
       description = "SSH public keys authorised for root login.";
     };
 
-    bootDevice = mkOption {
-      type = types.str;
-      example = "/dev/vda";
-      description = "Block device for GRUB BIOS install (most cloud VMs are /dev/vda).";
-    };
-
     tlsEnabled = mkOption {
       type = types.bool;
       example = true;

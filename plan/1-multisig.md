@@ -30,22 +30,22 @@ Six pieces in `nix-classix`.
 
 `nixosModules.safe-multisig`. The full backend stack: the upstream docker-compose project, the chain-bootstrap oneshot, host nginx, chain-config seeding via the Django ORM. Brand-free, chain-mandatory. Calls `mkSafeMultisigUi` internally to build its UI. This is what [nix-catacomb/hosts/catacomb/](https://github.com/classix-dev/nix-catacomb/tree/main/hosts/catacomb) is today, minus the renamed option namespace.
 
-`nixosModules.do-hardware`. DO bootstrap: disko layout, cloud-init datasource, `lib.mkForce` overrides for `digital-ocean-config.nix`. Currently inlined in [catacomb-classix-dev/flake.nix](https://github.com/classix-dev/catacomb-classix-dev/blob/main/flake.nix); extracting it opens a path for `nixosModules.hetzner-hardware` and friends later.
+`nixosModules.platforms.<provider>`. Per-cloud bootstrap modules grouped under `modules/platforms/`. First entry is `platforms.digital-ocean`: cloud-init datasource, `lib.mkForce` overrides for `digital-ocean-config.nix`, bootloader settings, and the disko fragment (single-disk BIOS, `/dev/vda`). Currently inlined in [catacomb-classix-dev/flake.nix](https://github.com/classix-dev/catacomb-classix-dev/blob/main/flake.nix). Future siblings (`platforms.hetzner`, `platforms.vultr`, `platforms.aws`) take the same shape; each is self-contained and owns its own disko + cloud-init quirks. The `safe-multisig` module is platform-agnostic and does not import disko itself.
 
 `packages.classix-brand-pack`. Classix-specific brand assets (Michroma + Space Grotesk fonts, ETC logo, theme) plus the React/CSS patch. Sourced from the pre-PR [nix-catacomb/pkgs/catacomb-branding/](https://github.com/classix-dev/nix-catacomb/tree/main/pkgs/catacomb-branding) (which the open PR deletes). A third party writing their own brand pack uses the same shape.
 
 `lib.chains.etc`. Attrset with the ETC chain definition: `chainId = 61`, RPC URI, block-explorer URL templates, native-currency metadata. Consumers spread it into `safe-multisig`'s `chains` option. Any new chain preset takes the same shape.
 
-`nixosModules.flavors.classix`. The composition: imports `safe-multisig` and `do-hardware`, wires `branding.pack` to `packages.classix-brand-pack`, sets `chains.etc` from `lib`, sets `primaryChain = "etc"`. The private `classix-deployments` repo imports just this and adds domain, ACME email, SSH keys, timezone, and the per-environment notification banner.
+`nixosModules.flavors.classix`. The composition: imports `safe-multisig` and `platforms.digital-ocean`, wires `branding.pack` to `packages.classix-brand-pack`, sets `chains.etc` from `lib`, sets `primaryChain = "etc"`, sets the theme colours, and wires a CORS-injecting `/rpc` nginx location for the ETC RPC. The private `classix-deployments` repo imports just this and adds domain, ACME email, SSH keys, timezone, and the per-environment notification banner.
 
 ## Migration order
 
-1. Land [refactor/extract-branding-pack](https://github.com/classix-dev/nix-catacomb/tree/refactor/extract-branding-pack) on nix-catacomb. No-op for the live deploy because the consumer flake updates in lockstep.
-2. Seed `nix-classix/modules/safe-multisig/` from `nix-catacomb/hosts/catacomb/`. Rename the option namespace from `catacomb.*` to `safeMultisig.*` in one commit. Lift the `pkgs/safe-wallet-web` derivation up to `packages.safe-multisig-ui` plus a `lib.mkSafeMultisigUi` helper at the flake root.
-3. Add `nix-classix/modules/do-hardware/` from the inlined block in `catacomb-classix-dev/flake.nix`.
-4. Add `nix-classix/packages/classix-brand-pack/` from the pre-PR `pkgs/catacomb-branding/` directory.
-5. Add `nix-classix/lib/chains/etc.nix` with the ETC chain attrset.
-6. Add `nix-classix/modules/flavors/classix.nix` that wires the above together.
+1. ~~Land [refactor/extract-branding-pack](https://github.com/classix-dev/nix-catacomb/tree/refactor/extract-branding-pack) on nix-catacomb.~~ Skipped. nix-catacomb stays frozen for the duration of the migration so the live deploy keeps working; we copy the PR-branch shape directly into nix-classix instead.
+2. Seed `nix-classix/modules/safe-multisig/` from `nix-catacomb/hosts/catacomb/`. Rename the option namespace from `catacomb.*` to `safeMultisig.*` in one commit. Lift the `pkgs/safe-wallet-web` derivation up to `packages.safe-multisig-ui` at the flake root.
+3. Add `nix-classix/modules/platforms/digital-ocean/` from the inlined block in `catacomb-classix-dev/flake.nix`. Move the disko fragment out of `safe-multisig` into the platform module; drop `safeMultisig.bootDevice` from the option surface (the platform module hardcodes `/dev/vda` for DO).
+4. Add `nix-classix/packages/classix-brand-pack/` from the pre-PR `pkgs/catacomb-branding/` directory. Patch internals (env var names, CSS classes) retain the historical `CATACOMB` prefix for stability; renaming is a follow-up.
+5. Add `nix-classix/lib/chains/etc.nix`: a function `{ domain }: { chainId = 61; ... }` returning the ETC chain attrset.
+6. Add `nix-classix/modules/flavors/classix.nix` that wires the above together (imports safe-multisig + platforms.digital-ocean, sets chains + branding + theme, mounts the CORS-injecting `/rpc` proxy).
 7. Create the private `classix-deployments` repo. Move per-deploy identity (domain, SSH keys, ACME email, notification banner) out of `catacomb-classix-dev` into it. Cut over the live deploy via a `nixos-rebuild switch` from the new flake.
 8. Archive `nix-catacomb` and `catacomb-classix-dev`. Leave a README pointing at `nix-classix`.
 

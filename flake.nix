@@ -139,24 +139,39 @@
         };
 
       flake = {
-        # Idiomatic consumption: import the safe-multisig module in your
-        # own flake's nixosConfigurations alongside
-        # `disko.nixosModules.disko`, then set `safeMultisig.*` options.
+        # Reusable data / functions consumers can call directly.
+        # `lib.chains.<name>` returns an entry for `safeMultisig.chains`.
+        # `lib.brandPacks.<name>` returns a `branding.pack` attrset.
+        lib = {
+          chains = {
+            etc = import ./lib/chains/etc.nix;
+          };
+          brandPacks = {
+            classix = import ./packages/classix-brand-pack/default.nix;
+          };
+        };
+
+        # Idiomatic consumption: import `flavors.classix` for a fully
+        # wired classix-on-DigitalOcean deploy and set per-deploy
+        # identity, or import `safe-multisig` + `platforms.<provider>`
+        # individually and wire chains/branding/RPC yourself.
         nixosModules =
           let
-            mkSafeMultisig =
-              { ... }:
-              {
-                imports = [ ./modules/safe-multisig ];
-                _module.args = {
-                  inherit (inputs) safe-infrastructure;
-                  inherit (inputs) safe-wallet-monorepo;
-                };
+            withArgs = mod: _: {
+              imports = [ mod ];
+              _module.args = {
+                inherit (inputs) safe-infrastructure;
+                inherit (inputs) safe-wallet-monorepo;
               };
+            };
+            mkSafeMultisig = withArgs ./modules/safe-multisig;
+            mkFlavorClassix = withArgs ./modules/flavors/classix.nix;
           in
           {
             safe-multisig = mkSafeMultisig;
             default = mkSafeMultisig;
+            platforms.digital-ocean = ./modules/platforms/digital-ocean;
+            flavors.classix = mkFlavorClassix;
           };
       };
     };

@@ -13,7 +13,6 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./options.nix
-    ./disko.nix
     ./safe-stack.nix
     ./nginx.nix
     ./ui.nix
@@ -32,11 +31,11 @@
   system.stateVersion = "25.05";
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # Disko's EF02 partition wires GRUB onto `safeMultisig.bootDevice` automatically.
-  boot.loader.grub = {
-    enable = true;
-    efiSupport = false;
-  };
+  # Disk layout and bootloader live in the platform module (see
+  # `modules/platforms/<provider>/`). Provider modules own disko +
+  # boot.loader because device naming and partition schemes differ
+  # per cloud (DO is /dev/vda BIOS; Hetzner Robot is multi-disk; AWS
+  # EC2 has NVMe). The safe-multisig module is platform-agnostic.
 
   networking.hostName = config.safeMultisig.hostName;
   networking.firewall.allowedTCPPorts = [
