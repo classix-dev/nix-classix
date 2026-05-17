@@ -11,6 +11,13 @@
 let
   cfg = config.rpcCorsProxy;
 
+  # Normalise upstreamUrl to always end in `/`. Without it nginx
+  # forwards `/rpc/<x>` to upstream `/rpc/<x>` (preserving the prefix)
+  # instead of stripping `/rpc/` and sending `/<x>`. Most JSON-RPC
+  # endpoints serve only at the root, so the un-stripped form 404s.
+  upstreamWithSlash =
+    if lib.hasSuffix "/" cfg.upstreamUrl then cfg.upstreamUrl else "${cfg.upstreamUrl}/";
+
   # Derive the upstream hostname from upstreamUrl for the `Host` header.
   # Strip scheme then take everything before the first `/`; bare host:port
   # is left intact, which is what nginx wants.
@@ -75,7 +82,7 @@ in
           return 204;
         }
 
-        proxy_pass ${cfg.upstreamUrl};
+        proxy_pass ${upstreamWithSlash};
         proxy_ssl_server_name on;
         proxy_http_version 1.1;
         proxy_set_header Host ${upstreamHost};
