@@ -13,11 +13,10 @@
 #     (saves several minutes of single-threaded work per iteration;
 #     the static export is the release artefact, not a dev run).
 #
-# Patch internals retain the historical `CATACOMB_` env-var prefix and
-# `catacombEdition` CSS class names. Renaming them everywhere requires
-# regenerating the patch against current upstream, tracked as a
-# follow-up; the prefix is internal to the patch+extraEnv contract and
-# not visible in nix-classix's option surface.
+# Env var prefix is `NEXT_PUBLIC_CLASSIX_*` and the patch internals
+# use `Classix` / `CLASSIX` / `classix` identifiers throughout. These
+# names are internal to the patch+extraEnv contract; consumers see only
+# the public option surface.
 {
   # Per-deploy banner string shown in a top-of-page modal. Empty hides
   # the modal entirely. Defaults to empty (production); deployments
@@ -68,14 +67,14 @@
   '';
 
   extraEnv = {
-    NEXT_PUBLIC_CATACOMB_TAGLINE = "classix edition";
-    NEXT_PUBLIC_CATACOMB_FOOTER_LINKS = builtins.toJSON [
+    NEXT_PUBLIC_CLASSIX_TAGLINE = "classix edition";
+    NEXT_PUBLIC_CLASSIX_FOOTER_LINKS = builtins.toJSON [
       {
         label = "classix.dev";
         url = "https://classix.dev";
       }
     ];
-    NEXT_PUBLIC_CATACOMB_GITHUB_REPO = "https://github.com/classix-dev/nix-classix";
-    NEXT_PUBLIC_CATACOMB_NOTIFICATION = notificationBanner;
+    NEXT_PUBLIC_CLASSIX_GITHUB_REPO = "https://github.com/classix-dev/nix-classix";
+    NEXT_PUBLIC_CLASSIX_NOTIFICATION = notificationBanner;
   };
 }

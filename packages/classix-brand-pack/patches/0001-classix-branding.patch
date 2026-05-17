@@ -6,18 +6,18 @@
        <div className={classnames(css.element, css.logoMobile)}>
 -        <Link href={logoHref} passHref>
 -          {isOfficialHost ? <SafeLogoMobile alt="Safe logo" /> : null}
-+        <Link href={logoHref} passHref className={css.catacombWordmark}>
-+          <div className={css.catacombName}>{BRAND_NAME}</div>
-+          <div className={css.catacombEdition}>{process.env.NEXT_PUBLIC_CATACOMB_TAGLINE || ''}</div>
++        <Link href={logoHref} passHref className={css.classixWordmark}>
++          <div className={css.classixName}>{BRAND_NAME}</div>
++          <div className={css.classixEdition}>{process.env.NEXT_PUBLIC_CLASSIX_TAGLINE || ''}</div>
          </Link>
        </div>
  
        <div className={classnames(css.element, css.hideMobile, css.logo)}>
 -        <Link href={logoHref} passHref>
 -          {isOfficialHost ? <SafeLabsLogo alt={BRAND_NAME} /> : BRAND_LOGO && <img src={BRAND_LOGO} alt={BRAND_NAME} />}
-+        <Link href={logoHref} passHref className={css.catacombWordmark}>
-+          <div className={css.catacombName}>{BRAND_NAME}</div>
-+          <div className={css.catacombEdition}>{process.env.NEXT_PUBLIC_CATACOMB_TAGLINE || ''}</div>
++        <Link href={logoHref} passHref className={css.classixWordmark}>
++          <div className={css.classixName}>{BRAND_NAME}</div>
++          <div className={css.classixEdition}>{process.env.NEXT_PUBLIC_CLASSIX_TAGLINE || ''}</div>
          </Link>
        </div>
  
@@ -34,7 +34,7 @@
 +   - make the wordmark itself a flex column so vertical sizing is
 +     governed by `min-height: max-content` on the children
 +   - set explicit pixel heights on each line so text always paints */
-+.catacombWordmark {
++.classixWordmark {
 +  display: flex;
 +  flex-direction: column;
 +  justify-content: center;
@@ -45,8 +45,8 @@
 +  padding: 0;
 +}
 +
-+.catacombName,
-+.catacombEdition {
++.classixName,
++.classixEdition {
 +  display: block;
 +  white-space: nowrap;
 +  margin: 0;
@@ -57,7 +57,7 @@
 +  min-height: max-content;
 +}
 +
-+.catacombName {
++.classixName {
 +  font-family: 'Space Grotesk', system-ui, sans-serif;
 +  font-weight: 600;
 +  font-size: 16px;
@@ -67,7 +67,7 @@
 +  color: var(--color-text-primary);
 +}
 +
-+.catacombEdition {
++.classixEdition {
 +  font-family: 'Michroma', system-ui, sans-serif;
 +  font-weight: 400;
 +  font-size: 12px;
@@ -79,12 +79,12 @@
 +}
 +
 +@media (max-width: 899.95px) {
-+  .catacombName {
++  .classixName {
 +    font-size: 14px;
 +    line-height: 16px;
 +    height: 16px;
 +  }
-+  .catacombEdition {
++  .classixEdition {
 +    font-size: 11px;
 +    line-height: 13px;
 +    height: 13px;
@@ -106,7 +106,7 @@
 -    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
 -    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
 -    <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg" color="#000" />
-+    {/* Favicon. Catacomb deploys ship a single SVG icon — the chain
++    {/* Favicon. Classix deploys ship a single SVG icon — the chain
 +        diamond, scales at any DPR. The upstream's raster fallbacks
 +        (favicon-16x16.png, favicon.ico, apple-touch-icon.png) were
 +        dropped on purpose: when both an SVG and rasters are advertised
@@ -122,8 +122,8 @@
  import { IS_PRODUCTION, COMMIT_HASH } from '@/config/constants'
  import type { FooterProps } from './footer.type'
  
-+type CatacombFooterLink = { label: string; url: string }
-+const parseCatacombLinks = (raw: string | undefined): CatacombFooterLink[] => {
++type ClassixFooterLink = { label: string; url: string }
++const parseClassixLinks = (raw: string | undefined): ClassixFooterLink[] => {
 +  if (!raw) return []
 +  try {
 +    const v = JSON.parse(raw)
@@ -132,7 +132,7 @@
 +    return []
 +  }
 +}
-+const CATACOMB_FOOTER_LINKS = parseCatacombLinks(process.env.NEXT_PUBLIC_CATACOMB_FOOTER_LINKS)
++const CLASSIX_FOOTER_LINKS = parseClassixLinks(process.env.NEXT_PUBLIC_CLASSIX_FOOTER_LINKS)
 +
  const footerPages = [
    AppRoutes.settings.index,
@@ -142,9 +142,9 @@
            </>
          ) : (
 -          <li>This is an unofficial distribution of the app</li>
-+          CATACOMB_FOOTER_LINKS.length > 0 ? (
++          CLASSIX_FOOTER_LINKS.length > 0 ? (
 +            <>
-+              {CATACOMB_FOOTER_LINKS.map((l) => (
++              {CLASSIX_FOOTER_LINKS.map((l) => (
 +                <li key={l.url}>
 +                  <ExternalLink href={l.url} noIcon>
 +                    {l.label}
@@ -161,8 +161,8 @@
 -          <ExternalLink href={`${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`} noIcon>
 +          <ExternalLink
 +            href={
-+              process.env.NEXT_PUBLIC_CATACOMB_GITHUB_REPO
-+                ? process.env.NEXT_PUBLIC_CATACOMB_GITHUB_REPO
++              process.env.NEXT_PUBLIC_CLASSIX_GITHUB_REPO
++                ? process.env.NEXT_PUBLIC_CLASSIX_GITHUB_REPO
 +                : `${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`
 +            }
 +            noIcon
@@ -183,13 +183,13 @@
 +import DialogContentText from '@mui/material/DialogContentText'
 +import DialogTitle from '@mui/material/DialogTitle'
 +
-+const CATACOMB_NOTIFICATION = process.env.NEXT_PUBLIC_CATACOMB_NOTIFICATION || ''
-+const CATACOMB_NOTIFICATION_ACK_KEY = 'catacomb:notification:ack'
++const CLASSIX_NOTIFICATION = process.env.NEXT_PUBLIC_CLASSIX_NOTIFICATION || ''
++const CLASSIX_NOTIFICATION_ACK_KEY = 'classix:notification:ack'
 +// Re-show the notification modal once an hour. The most recent ack
 +// timestamp lives in localStorage; a 1-min poll re-evaluates so a
 +// user who never reloads still sees the modal again on schedule.
-+const CATACOMB_NOTIFICATION_INTERVAL_MS = 60 * 60 * 1000
-+const CATACOMB_NOTIFICATION_POLL_MS = 60 * 1000
++const CLASSIX_NOTIFICATION_INTERVAL_MS = 60 * 60 * 1000
++const CLASSIX_NOTIFICATION_POLL_MS = 60 * 1000
  
  import Topbar from '@/components/common/Header/Topbar'
  import Header from '@/components/common/Header'
@@ -197,35 +197,35 @@
      setFullWidth(!isSidebarVisible)
    }, [isSidebarVisible, setFullWidth])
  
-+  // Catacomb notification: full-screen modal that re-fires every
-+  // CATACOMB_NOTIFICATION_INTERVAL_MS. localStorage holds the last ack
++  // Classix notification: full-screen modal that re-fires every
++  // CLASSIX_NOTIFICATION_INTERVAL_MS. localStorage holds the last ack
 +  // timestamp; we re-evaluate on mount and on a 1-min poll so a user
 +  // who never reloads still sees the modal again on schedule.
-+  const [catacombNotificationOpen, setCatacombNotificationOpen] = useState(false)
++  const [classixNotificationOpen, setClassixNotificationOpen] = useState(false)
 +  useEffect(() => {
-+    if (!CATACOMB_NOTIFICATION) return
++    if (!CLASSIX_NOTIFICATION) return
 +    if (typeof window === 'undefined') return
 +    const evaluate = () => {
 +      let lastAck = 0
 +      try {
-+        const raw = window.localStorage.getItem(CATACOMB_NOTIFICATION_ACK_KEY)
++        const raw = window.localStorage.getItem(CLASSIX_NOTIFICATION_ACK_KEY)
 +        const parsed = raw ? Number(raw) : 0
 +        lastAck = Number.isFinite(parsed) && parsed > 0 ? parsed : 0
 +      } catch {
 +        // localStorage may throw in private mode / disabled — treat as never acked
 +      }
-+      if (Date.now() - lastAck >= CATACOMB_NOTIFICATION_INTERVAL_MS) {
-+        setCatacombNotificationOpen(true)
++      if (Date.now() - lastAck >= CLASSIX_NOTIFICATION_INTERVAL_MS) {
++        setClassixNotificationOpen(true)
 +      }
 +    }
 +    evaluate()
-+    const id = window.setInterval(evaluate, CATACOMB_NOTIFICATION_POLL_MS)
++    const id = window.setInterval(evaluate, CLASSIX_NOTIFICATION_POLL_MS)
 +    return () => window.clearInterval(id)
 +  }, [])
-+  const handleCatacombNotificationAck = () => {
-+    setCatacombNotificationOpen(false)
++  const handleClassixNotificationAck = () => {
++    setClassixNotificationOpen(false)
 +    try {
-+      window.localStorage.setItem(CATACOMB_NOTIFICATION_ACK_KEY, String(Date.now()))
++      window.localStorage.setItem(CLASSIX_NOTIFICATION_ACK_KEY, String(Date.now()))
 +    } catch {
 +      // ignore — ack not persisted, but the user has seen it this load
 +    }
@@ -233,20 +233,20 @@
 +
    return (
      <>
-+      {CATACOMB_NOTIFICATION && (
++      {CLASSIX_NOTIFICATION && (
 +        <Dialog
-+          open={catacombNotificationOpen}
-+          aria-labelledby="catacomb-notification-title"
-+          aria-describedby="catacomb-notification-text"
++          open={classixNotificationOpen}
++          aria-labelledby="classix-notification-title"
++          aria-describedby="classix-notification-text"
 +          maxWidth="xs"
 +          fullWidth
 +        >
-+          <DialogTitle id="catacomb-notification-title">Heads up</DialogTitle>
++          <DialogTitle id="classix-notification-title">Heads up</DialogTitle>
 +          <DialogContent>
-+            <DialogContentText id="catacomb-notification-text">{CATACOMB_NOTIFICATION}</DialogContentText>
++            <DialogContentText id="classix-notification-text">{CLASSIX_NOTIFICATION}</DialogContentText>
 +          </DialogContent>
 +          <DialogActions>
-+            <Button onClick={handleCatacombNotificationAck} autoFocus variant="contained">
++            <Button onClick={handleClassixNotificationAck} autoFocus variant="contained">
 +              OK
 +            </Button>
 +          </DialogActions>
