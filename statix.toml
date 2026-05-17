@@ -1,0 +1,7 @@
+# statix lints to skip globally.
+disabled = [
+  # We use multiple `systemd.tmpfiles.rules`, `systemd.services.foo`,
+  # `systemd.services.bar` paths across modules. Merging into one
+  # `systemd = { ... }` block hurts readability when sections are far apart.
+  "repeated_keys",
+]

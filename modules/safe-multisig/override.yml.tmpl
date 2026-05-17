@@ -1,0 +1,101 @@
+# Restart policy applied to every container in the stack. Upstream's
+# `docker-compose.yml` ships no restart policy, so a process that exits
+# would otherwise stay exited until a human ran `systemctl restart
+# safe-multisig-stack`. `unless-stopped` lets `docker compose down`
+# continue to work for clean shutdowns.
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  # ── Postgres DBs ─────────────────────────────────────────────────────
+  cfg-db:
+    <<: *restart
+    environment: { POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}" }
+  cgw-db:
+    <<: *restart
+    environment: { POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}" }
+  txs-db:
+    <<: *restart
+    environment: { POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}" }
+  events-db:
+    <<: *restart
+    environment: { POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}" }
+
+  # ── Redis ────────────────────────────────────────────────────────────
+  cgw-redis: *restart
+  txs-redis: *restart
+
+  # ── RabbitMQ ─────────────────────────────────────────────────────────
+  # 4.x disables `transient_nonexcl_queues` which Celery's default queue
+  # declaration relies on. Pin to 3.13 until upstream celery updates.
+  txs-rabbitmq:
+    <<: *restart
+    image: "rabbitmq:3.13-alpine"
+  general-rabbitmq:
+    <<: *restart
+    image: "rabbitmq:3.13-alpine"
+
+  # ── Internal compose-stack nginx (path fanout on :8000) ──────────────
+  nginx: *restart
+
+  # ── Application services ─────────────────────────────────────────────
+  cfg-web:
+    <<: *restart
+    environment:
+      SECRET_KEY: "${DJANGO_SECRET}"
+      DJANGO_SUPERUSER_PASSWORD: "${DJANGO_SUPERUSER_PASSWORD}"
+      DJANGO_SUPERUSER_EMAIL: "admin@@SAFE_MULTISIG_DOMAIN@"
+      CGW_AUTH_TOKEN: "${CGW_AUTH_TOKEN}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      CSRF_TRUSTED_ORIGINS: "https://@SAFE_MULTISIG_DOMAIN@"
+
+  txs-web:
+    <<: *restart
+    environment:
+      DJANGO_SECRET_KEY: "${DJANGO_SECRET}"
+      DATABASE_URL: "psql://postgres:${POSTGRES_PASSWORD}@txs-db:5432/postgres"
+      CSRF_TRUSTED_ORIGINS: "https://@SAFE_MULTISIG_DOMAIN@"
+
+  txs-worker-indexer: &txs-worker-overrides
+    <<: *restart
+    environment:
+      DJANGO_SECRET_KEY: "${DJANGO_SECRET}"
+      DATABASE_URL: "psql://postgres:${POSTGRES_PASSWORD}@txs-db:5432/postgres"
+
+  txs-worker-contracts-tokens: *txs-worker-overrides
+  txs-worker-notifications-webhooks: *txs-worker-overrides
+  txs-scheduler: *txs-worker-overrides
+
+  events-web:
+    <<: *restart
+    environment:
+      DATABASE_URL: "psql://postgres:${POSTGRES_PASSWORD}@events-db:5432/postgres"
+
+  cgw-web:
+    <<: *restart
+    environment:
+      AUTH_TOKEN: "${CGW_AUTH_TOKEN}"
+      AUTH_POST_LOGIN_REDIRECT_URI: "https://@SAFE_MULTISIG_DOMAIN@/"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      PRICES_PROVIDER_API_KEY: "${PRICES_PROVIDER_API_KEY}"
+      PRICES_PROVIDER_API_BASE_URI: "${PRICES_PROVIDER_API_BASE_URI}"
+      PRICES_TTL_SECONDS: "${PRICES_TTL_SECONDS}"
+      NATIVE_COINS_PRICES_TTL_SECONDS: "${NATIVE_COINS_PRICES_TTL_SECONDS}"
+      ZERION_API_KEY: "${ZERION_API_KEY}"
+
+  # The upstream UI is replaced by a Nix-built static export served from
+  # the host nginx (see modules/safe-multisig/ui.nix). The `ui:` service
+  # is kept only as a stub on :8080. Internal nginx resolves the `ui`
+  # hostname at startup, so removing it would break the whole stack.
+  # Returns 410 Gone to make stray internal hits visible. Reuses
+  # `nginx:alpine` (the internal nginx already pulls this image).
+  ui:
+    <<: *restart
+    image: nginx:alpine
+    entrypoint: [ "sh", "-c" ]
+    command:
+      - |
+        cat >/etc/nginx/conf.d/default.conf <<EOF
+        server { listen 8080; location / { return 410 "ui served from host nginx\n"; } }
+        EOF
+        exec nginx -g 'daemon off;'
