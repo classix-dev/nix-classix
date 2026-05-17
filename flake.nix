@@ -2,7 +2,12 @@
   description = "Nix flake: self-hosted Safe multisig stack, hardware modules, brand packs.";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Pinned to a known-good commit. The newer nixos-unstable ships a
+    # yarn-berry that expects yarn-lock cacheKey v9, but
+    # safe-wallet-monorepo@web-v1.88.0 ships v8 and the FOD outputHash
+    # is locked to the matching cache. Bump together with a UI version
+    # bump (and a fresh `outputHash` in `packages/safe-multisig-ui`).
+    nixpkgs.url = "github:NixOS/nixpkgs/1c3fe55ad329cbcb28471bb30f05c9827f724c76";
 
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
