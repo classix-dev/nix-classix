@@ -40,4 +40,17 @@
     logoUri = "https://${domain}/assets/etc-logo.svg";
   };
   chainLogoUri = "https://${domain}/assets/etc-logo.svg";
+
+  # Coingecko IDs used by safe-config-service to look up native-coin
+  # price and balances data. Coingecko's id for Ethereum Classic is
+  # `ethereum-classic`; the wallet's USD figure stays $0 without this.
+  pricesProvider = {
+    nativeCoin = "ethereum-classic";
+    chainName = "ethereum-classic";
+  };
+  balancesProvider = {
+    chainName = "ethereum-classic";
+    # Zerion / external balances aggregator: leave off unless we wire one.
+    enabled = false;
+  };
 }

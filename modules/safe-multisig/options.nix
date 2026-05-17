@@ -270,6 +270,47 @@
               type = types.nullOr types.str;
               default = null;
             };
+
+            # Coingecko / external provider IDs that safe-config-service
+            # uses to populate native-coin price and balances data.
+            # Without these the wallet shows $0 for native balances.
+            pricesProvider = mkOption {
+              type = types.submodule {
+                options = {
+                  nativeCoin = mkOption {
+                    type = types.nullOr types.str;
+                    default = null;
+                    example = "ethereum-classic";
+                    description = "Coingecko id for the native coin.";
+                  };
+                  chainName = mkOption {
+                    type = types.nullOr types.str;
+                    default = null;
+                    example = "ethereum-classic";
+                    description = "Coingecko id for the chain (token prices).";
+                  };
+                };
+              };
+              default = { };
+            };
+            balancesProvider = mkOption {
+              type = types.submodule {
+                options = {
+                  chainName = mkOption {
+                    type = types.nullOr types.str;
+                    default = null;
+                    example = "ethereum-classic";
+                    description = "External balances-aggregator chain name.";
+                  };
+                  enabled = mkOption {
+                    type = types.bool;
+                    default = false;
+                    description = "Enable the external balances aggregator (Zerion).";
+                  };
+                };
+              };
+              default = { };
+            };
           };
         }
       );

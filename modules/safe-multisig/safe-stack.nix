@@ -187,6 +187,10 @@ in
           transaction_service_uri = c.transactionService;
           theme_text_color = cfg.branding.theme.textColor;
           theme_background_color = cfg.branding.theme.backgroundColor;
+          prices_provider_native_coin = c.pricesProvider.nativeCoin;
+          prices_provider_chain_name = c.pricesProvider.chainName;
+          balances_provider_chain_name = c.balancesProvider.chainName;
+          balances_provider_enabled = c.balancesProvider.enabled;
         }) cfg.chains;
       };
 
