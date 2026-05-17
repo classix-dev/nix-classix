@@ -181,6 +181,30 @@
       };
     };
 
+    # ── Transaction service indexer tuning ──────────────────────────────
+    txs = {
+      eventsBlockProcessLimit = mkOption {
+        type = types.ints.positive;
+        default = 50;
+        description = ''
+          Initial number of blocks the txs events indexer processes per
+          iteration (`ETH_EVENTS_BLOCK_PROCESS_LIMIT`). Auto-adjusts up to
+          `eventsBlockProcessLimitMax`. Upstream default 50, conservative
+          for any real chain; bump (e.g. 1000) for faster backfill on
+          chains the indexer is many blocks behind.
+        '';
+      };
+      eventsBlockProcessLimitMax = mkOption {
+        type = types.ints.unsigned;
+        default = 10000;
+        description = ''
+          Max blocks-per-iteration for the auto-adjusting events indexer
+          (`ETH_EVENTS_BLOCK_PROCESS_LIMIT_MAX`). 0 disables the upper
+          cap entirely.
+        '';
+      };
+    };
+
     # ── cfg-service service keys (Service.key in chains_service) ────────
     # The frontend (safe-wallet-web) issues `/v2/chains?serviceKey=WALLET_WEB`.
     # cfg-service `get_object_or_404(Service, key=service_key)` returns 404

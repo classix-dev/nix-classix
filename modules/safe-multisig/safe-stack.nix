@@ -131,6 +131,8 @@ in
         PRICES_TTL_SECONDS=${toString cfg.cgw.pricesProvider.tokenPricesTtlSeconds}
         NATIVE_COINS_PRICES_TTL_SECONDS=${toString cfg.cgw.pricesProvider.nativeCoinPricesTtlSeconds}
         ZERION_API_KEY=${emptyIfNull cfg.cgw.zerion.apiKey}
+        ETH_EVENTS_BLOCK_PROCESS_LIMIT=${toString cfg.txs.eventsBlockProcessLimit}
+        ETH_EVENTS_BLOCK_PROCESS_LIMIT_MAX=${toString cfg.txs.eventsBlockProcessLimitMax}
         EOF
         chmod 600 ${envFile}
 
