@@ -50,14 +50,8 @@ The fastest path, a fully-wired Classix deploy on DigitalOcean:
 
 Pick individual pieces for a more custom build: import `safe-multisig`
 + a `platform-<provider>` module and wire chains / brand / RPC
-yourself, or take just `packages.safe-multisig-ui` for a static
+yourself, or take `packages.safe-multisig-ui` alone for a static
 frontend you host elsewhere.
-
-## Architecture and migration
-
-[plan/1-multisig.md](plan/1-multisig.md) explains the layering, the
-naming choices, what's deferred, and the migration from the older
-`nix-catacomb` library.
 
 ## Lint
 

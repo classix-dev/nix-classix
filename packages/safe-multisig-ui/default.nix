@@ -1,14 +1,16 @@
 # Static-export build of safe-global/safe-wallet-monorepo's `apps/web`
 # workspace. Replaces the upstream container that runs `next build` at
-# startup (see README.md "UI status").
+# startup.
 #
 # `next.config.mjs` already sets `output: 'export'`, so `next build`
-# emits a static directory to `apps/web/out/`. We copy that to `$out`
-# and serve it via the host nginx (see `modules/safe-multisig/ui.nix`).
+# emits a static directory to `apps/web/out/`. The derivation copies
+# that to `$out`; the NixOS module at `modules/safe-multisig/ui.nix`
+# serves it via the host nginx.
 #
 # Per-deploy values (gateway URL, chain id, branding) are baked in at
-# build time, so any change requires a rebuild. Cachix substituters
-# absorb the cost when nothing changed.
+# build time, so any change requires a rebuild (~5-10 min, mostly
+# next-export's single-threaded prerender). Pin a binary cache that
+# has the bundle to skip the rebuild on consumers.
 {
   lib,
   stdenv,

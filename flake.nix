@@ -120,7 +120,7 @@
                 text = ''
                   set -eu
                   ${lib.getExe config.treefmt.build.wrapper} --fail-on-change
-                  echo "✓ lint passed"
+                  echo "lint passed"
                 '';
               }
             );
@@ -142,12 +142,13 @@
 
         # Idiomatic consumption: in your own flake's nixosConfigurations,
         # import `flavor-classix` (chain + brand + RPC) plus the
-        # `platform-<provider>` module for your cloud (just
-        # `platform-digital-ocean` today), and set per-deploy identity
-        # via `safeMultisig.*`. Flavor and platform are orthogonal axes;
-        # both have to be composed by the consumer. For a custom stack
-        # without our opinions, import `safe-multisig` + a platform
-        # module and wire chains / brand / RPC yourself.
+        # `platform-<provider>` module for your cloud
+        # (`platform-digital-ocean` is the only one today), and set
+        # per-deploy identity via `safeMultisig.*`. Flavor and platform
+        # are orthogonal axes; both have to be composed by the consumer.
+        # For a custom stack without these opinions, import
+        # `safe-multisig` + a platform module and wire chains, brand,
+        # and RPC yourself.
         nixosModules =
           let
             withArgs = mod: _: {

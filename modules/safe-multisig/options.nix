@@ -247,35 +247,67 @@
       type = types.attrsOf (
         types.submodule {
           options = {
-            chainId = mkOption { type = types.int; };
-            shortName = mkOption { type = types.str; };
-            chainName = mkOption { type = types.str; };
+            chainId = mkOption {
+              type = types.int;
+              description = "EIP-155 chain id. Wallets verify they're signing for the right network with this.";
+            };
+            shortName = mkOption {
+              type = types.str;
+              description = "EIP-3770 short name used as the address prefix (`eth:0x...`, `etc:0x...`).";
+            };
+            chainName = mkOption {
+              type = types.str;
+              description = "Human-readable chain name shown in the wallet (e.g. \"Ethereum Classic\").";
+            };
             description = mkOption {
               type = types.str;
               default = "";
+              description = "Optional one-line description shown alongside the chain name.";
             };
             isTestnet = mkOption {
               type = types.bool;
               default = false;
+              description = "Marks the chain as a testnet; the wallet shows a warning banner.";
             };
             l2 = mkOption {
               type = types.bool;
               default = false;
+              description = "Marks the chain as an L2; changes some indexer behaviour in the txs service.";
             };
-            rpcUri = mkOption { type = types.str; };
+            rpcUri = mkOption {
+              type = types.str;
+              description = ''
+                URL the wallet uses for JSON-RPC. Must support CORS, or
+                be served behind the `rpc-cors-proxy` module.
+              '';
+            };
             blockExplorerUriTemplate = mkOption {
               type = types.attrsOf types.str;
-              description = "Map of { address, txHash, api } URL templates.";
+              description = ''
+                URL templates for the chain's block explorer. Required keys:
+                `address`, `txHash`, `api`. `{{address}}`, `{{txHash}}`,
+                `{{module}}`, `{{action}}`, `{{apiKey}}` substitute at click time.
+              '';
             };
-            transactionService = mkOption { type = types.str; };
+            transactionService = mkOption {
+              type = types.str;
+              description = "Public URL of the Safe Transaction Service for this chain. Typically `https://<domain>/txs`.";
+            };
             nativeCurrency = mkOption {
               type = types.submodule {
                 options = {
-                  name = mkOption { type = types.str; };
-                  symbol = mkOption { type = types.str; };
+                  name = mkOption {
+                    type = types.str;
+                    description = "Full name of the native currency (e.g. \"Ether Classic\").";
+                  };
+                  symbol = mkOption {
+                    type = types.str;
+                    description = "Trading symbol of the native currency (e.g. \"ETC\").";
+                  };
                   decimals = mkOption {
                     type = types.int;
                     default = 18;
+                    description = "Decimals of the native currency. 18 for every EVM chain.";
                   };
                   logoUri = mkOption {
                     type = types.str;
@@ -289,10 +321,12 @@
                   };
                 };
               };
+              description = "Native-coin metadata exposed to the wallet.";
             };
             chainLogoUri = mkOption {
               type = types.nullOr types.str;
               default = null;
+              description = "URL to a logo image for the chain itself (distinct from the native-coin logo).";
             };
 
             # Coingecko / external provider IDs that safe-config-service

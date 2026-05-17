@@ -74,7 +74,7 @@ in
       # BLOCK NAME for SNI; we override to the actual upstream hostname.
       #
       # `Connection ""` clears the upstream's default `close` so the
-      # keepalive connection pool actually keeps connections alive.
+      # keepalive connection pool retains connections across requests.
       #
       # CORS headers are repeated inside the OPTIONS branch because
       # nginx does NOT inherit outer `add_header`s into an `if` block

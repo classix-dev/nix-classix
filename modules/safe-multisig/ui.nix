@@ -1,7 +1,7 @@
-# Pre-built static UI (safe-wallet-monorepo `next export`) served directly
-# from the host nginx. Replaces the upstream `ui:` docker container that
-# ran `next build` at boot. See README.md "Why Nix?" and the package
-# derivation at `packages/safe-multisig-ui`.
+# Pre-built static UI (safe-wallet-monorepo `next export`) served from
+# the host nginx. Replaces the upstream `ui:` docker container that
+# ran `next build` at boot. Derivation lives at
+# `packages/safe-multisig-ui`.
 #
 # Source-tree branding is opt-in via `safeMultisig.branding.pack`. When
 # set, the upstream monorepo source is patched (`pack.patches`), files
@@ -12,8 +12,9 @@
 #
 # Branding, gateway URL, and chain id are baked into the bundle at Nix
 # eval time, so any change to `config.safeMultisig.branding`,
-# `config.safeMultisig.domain`, or the primary chain's id triggers a UI
-# rebuild. Cachix substituters absorb the cost when nothing changed.
+# `config.safeMultisig.domain`, or the primary chain's id triggers a
+# full UI rebuild (~5-10 min). Pin to a binary cache that has the
+# bundle to skip the rebuild on consumers.
 {
   config,
   lib,

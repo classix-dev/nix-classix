@@ -59,7 +59,9 @@ let
 
   versionEnvLines = lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k}=${v}") versions);
 
-  emptyIfNull = v: if v == null then "" else v;
+  # `null` (nullOr-typed unset option) becomes empty for the env file;
+  # all other values pass through unchanged.
+  orEmpty = v: lib.optionalString (v != null) v;
 in
 {
   systemd.tmpfiles.rules = [
@@ -126,11 +128,11 @@ in
         CGW_AUTH_TOKEN=$CGW_AUTH_TOKEN
         POSTGRES_PASSWORD=$POSTGRES_PASSWORD
         DJANGO_SUPERUSER_PASSWORD=$DJANGO_SUPERUSER_PASSWORD
-        PRICES_PROVIDER_API_KEY=${emptyIfNull cfg.cgw.pricesProvider.apiKey}
-        PRICES_PROVIDER_API_BASE_URI=${emptyIfNull cfg.cgw.pricesProvider.apiBaseUri}
+        PRICES_PROVIDER_API_KEY=${orEmpty cfg.cgw.pricesProvider.apiKey}
+        PRICES_PROVIDER_API_BASE_URI=${orEmpty cfg.cgw.pricesProvider.apiBaseUri}
         PRICES_TTL_SECONDS=${toString cfg.cgw.pricesProvider.tokenPricesTtlSeconds}
         NATIVE_COINS_PRICES_TTL_SECONDS=${toString cfg.cgw.pricesProvider.nativeCoinPricesTtlSeconds}
-        ZERION_API_KEY=${emptyIfNull cfg.cgw.zerion.apiKey}
+        ZERION_API_KEY=${orEmpty cfg.cgw.zerion.apiKey}
         ETH_EVENTS_BLOCK_PROCESS_LIMIT=${toString cfg.txs.eventsBlockProcessLimit}
         ETH_EVENTS_BLOCK_PROCESS_LIMIT_MAX=${toString cfg.txs.eventsBlockProcessLimitMax}
         EOF

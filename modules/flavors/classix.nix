@@ -48,7 +48,7 @@ in
     domain = d;
     # ETC Cooperative's public CoreGeth node. Real ETC RPC (returns real
     # block heights, supports `eth_getLogs`, etc.) so the Safe Transaction
-    # Service indexer can actually keep up. `rpc.classix.dev` is the
+    # Service indexer can keep up. `rpc.classix.dev` is the
     # block-explorer-grade Clasico endpoint; it answers `eth_chainId`
     # but `eth_blockNumber` returns 0x0 and the indexer stalls.
     # Override per-deploy if Classix runs its own full node.
