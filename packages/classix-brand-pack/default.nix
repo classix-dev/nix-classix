@@ -73,6 +73,10 @@
         label = "classix.dev";
         url = "https://classix.dev";
       }
+      {
+        label = "nix-classix";
+        url = "https://github.com/classix-dev/nix-classix";
+      }
     ];
     NEXT_PUBLIC_CLASSIX_GITHUB_REPO = "https://github.com/classix-dev/nix-classix";
     NEXT_PUBLIC_CLASSIX_NOTIFICATION = notificationBanner;
