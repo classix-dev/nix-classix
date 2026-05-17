@@ -31,12 +31,6 @@
   system.stateVersion = "25.05";
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # Disk layout and bootloader live in the platform module (see
-  # `modules/platforms/<provider>/`). Provider modules own disko +
-  # boot.loader because device naming and partition schemes differ
-  # per cloud (DO is /dev/vda BIOS; Hetzner Robot is multi-disk; AWS
-  # EC2 has NVMe). The safe-multisig module is platform-agnostic.
-
   networking.hostName = config.safeMultisig.hostName;
   networking.firewall.allowedTCPPorts = [
     22

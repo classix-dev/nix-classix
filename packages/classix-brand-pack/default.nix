@@ -61,8 +61,10 @@
     # of single-threaded work per UI rebuild; the static export is the
     # release artefact, not a dev run.
     chmod +w apps/web/next.config.mjs
-    sed -i "s|output: 'export', // static site export|output: 'export', // static site export\n  typescript: { ignoreBuildErrors: true },|" apps/web/next.config.mjs
-    sed -i "s|dirs: \['src', 'cypress'\]|dirs: ['src', 'cypress'], ignoreDuringBuilds: true|" apps/web/next.config.mjs
+    sed -i \
+      -e "s|output: 'export', // static site export|output: 'export', // static site export\n  typescript: { ignoreBuildErrors: true },|" \
+      -e "s|dirs: \['src', 'cypress'\]|dirs: ['src', 'cypress'], ignoreDuringBuilds: true|" \
+      apps/web/next.config.mjs
   '';
 
   extraEnv = {

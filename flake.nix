@@ -82,28 +82,12 @@
             src = inputs.safe-wallet-monorepo;
           };
 
+          # Treefmt's wrapper already runs nixfmt + statix + deadnix in
+          # fail-on-change mode, and the pre-commit hook re-runs them on
+          # commit. Standalone `statix` / `deadnix` derivations would
+          # duplicate the work.
           checks = {
             inherit (config.treefmt.build) wrapper;
-            statix =
-              pkgs.runCommand "statix-check"
-                {
-                  nativeBuildInputs = [ pkgs.statix ];
-                }
-                ''
-                  cd ${./.}
-                  statix check .
-                  touch $out
-                '';
-            deadnix =
-              pkgs.runCommand "deadnix-check"
-                {
-                  nativeBuildInputs = [ pkgs.deadnix ];
-                }
-                ''
-                  cd ${./.}
-                  deadnix --fail .
-                  touch $out
-                '';
           };
 
           devShells.default = pkgs.mkShell {
@@ -171,6 +155,7 @@
             safe-multisig = mkSafeMultisig;
             default = mkSafeMultisig;
             platforms.digital-ocean = ./modules/platforms/digital-ocean;
+            rpc-cors-proxy = ./modules/rpc-cors-proxy;
             flavors.classix = mkFlavorClassix;
           };
       };

@@ -67,9 +67,9 @@ in
     "d ${stateDir}/secrets 0700 root root -"
   ];
 
-  # Use Docker (not podman). Upstream compose syntax assumes Docker, and
-  # docker-compose talks to the Docker daemon directly.
-  virtualisation.docker.enable = true;
+  # docker-compose CLI on the host so operators can poke at the running
+  # stack (`docker compose ps`, etc.). The Docker daemon itself is
+  # enabled by the top-level safe-multisig module.
   environment.systemPackages = [ pkgs.docker-compose ];
 
   # ── Stack lifecycle ─────────────────────────────────────────────────────

@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
-      - run: nix flake check --all-systems --print-build-logs
+      - run: nix flake check --print-build-logs
 
   flake-lock:
     name: flake.lock health

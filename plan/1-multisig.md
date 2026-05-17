@@ -36,7 +36,9 @@ Six pieces in `nix-classix`.
 
 `lib.chains.etc`. Attrset with the ETC chain definition: `chainId = 61`, RPC URI, block-explorer URL templates, native-currency metadata. Consumers spread it into `safe-multisig`'s `chains` option. Any new chain preset takes the same shape.
 
-`nixosModules.flavors.classix`. The composition: imports `safe-multisig` and `platforms.digital-ocean`, wires `branding.pack` to `packages.classix-brand-pack`, sets `chains.etc` from `lib`, sets `primaryChain = "etc"`, sets the theme colours, and wires a CORS-injecting `/rpc` nginx location for the ETC RPC. The private `classix-deployments` repo imports just this and adds domain, ACME email, SSH keys, timezone, and the per-environment notification banner.
+`nixosModules.rpc-cors-proxy`. A reusable reverse-proxy module that adds CORS headers on top of a JSON-RPC upstream. Decoupled from `safe-multisig`. Used by the classix flavor to forward `rpc.<domain>` to the classix-operated RPC endpoint; importable on its own by any dApp host that needs the same dance.
+
+`nixosModules.flavors.classix`. The composition: imports `safe-multisig` and `rpc-cors-proxy`, wires `branding.pack` to the classix brand pack, sets `chains.etc` from `lib`, sets `primaryChain = "etc"`, sets the theme colours, and enables the RPC CORS proxy with `upstreamUrl = "https://rpc.classix.dev"` as the default. Platform-agnostic. The private `classix-deployments` repo composes this with a `platforms.<provider>` module of choice and adds per-deploy identity (domain, ACME email, SSH keys, timezone, notification banner).
 
 ## Migration order
 
@@ -45,7 +47,7 @@ Six pieces in `nix-classix`.
 3. Add `nix-classix/modules/platforms/digital-ocean/` from the inlined block in `catacomb-classix-dev/flake.nix`. Move the disko fragment out of `safe-multisig` into the platform module; drop `safeMultisig.bootDevice` from the option surface (the platform module hardcodes `/dev/vda` for DO).
 4. Add `nix-classix/packages/classix-brand-pack/` from the pre-PR `pkgs/catacomb-branding/` directory. Patch internals (env var names, CSS classes) retain the historical `CATACOMB` prefix for stability; renaming is a follow-up.
 5. Add `nix-classix/lib/chains/etc.nix`: a function `{ domain }: { chainId = 61; ... }` returning the ETC chain attrset.
-6. Add `nix-classix/modules/flavors/classix.nix` that wires the above together (imports safe-multisig + platforms.digital-ocean, sets chains + branding + theme, mounts the CORS-injecting `/rpc` proxy).
+6. Add `nix-classix/modules/rpc-cors-proxy/` (generic CORS-injecting reverse proxy) and `nix-classix/modules/flavors/classix.nix` (composition: imports safe-multisig + rpc-cors-proxy, sets chains + branding + theme, defaults the RPC upstream to `rpc.classix.dev`). The flavor stays platform-agnostic; consumers compose with a `platforms.<provider>` module.
 7. Create the private `classix-deployments` repo. Move per-deploy identity (domain, SSH keys, ACME email, notification banner) out of `catacomb-classix-dev` into it. Cut over the live deploy via a `nixos-rebuild switch` from the new flake.
 8. Archive `nix-catacomb` and `catacomb-classix-dev`. Leave a README pointing at `nix-classix`.
 
