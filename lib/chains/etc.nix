@@ -15,11 +15,8 @@
 #     // { rpcUri = "https://my-private-etc-node.example.com"; };
 {
   domain,
-
-  # Default points at the local CORS-injecting reverse proxy mounted
-  # at `<domain>/rpc/` by the classix flavor (`rpc-cors-proxy` module).
-  # Override if you're running your own ETC node or pointing at a
-  # different public RPC that already sends CORS headers.
+  # Default assumes the `rpc-cors-proxy` module is mounted at
+  # `<domain>/rpc/`. Override to point at any CORS-friendly RPC.
   rpcUri ? "https://${domain}/rpc/",
 }:
 {
