@@ -16,11 +16,11 @@
 {
   domain,
 
-  # Default points at a local CORS-injecting reverse proxy on the
-  # `rpc.<domain>` subdomain, which the classix flavor mounts in
-  # nginx. Override if you're running your own ETC node or pointing at
-  # a different public RPC (with CORS already configured).
-  rpcUri ? "https://rpc.${domain}",
+  # Default points at the local CORS-injecting reverse proxy mounted
+  # at `<domain>/rpc/` by the classix flavor (`rpc-cors-proxy` module).
+  # Override if you're running your own ETC node or pointing at a
+  # different public RPC that already sends CORS headers.
+  rpcUri ? "https://${domain}/rpc/",
 }:
 {
   chainId = 61;

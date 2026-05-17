@@ -39,14 +39,15 @@ in
     };
   };
 
-  # Forward `rpc.<deploy-domain>` to the classix-operated upstream.
-  # Wallet UI talks to this via the chain's `rpcUri`. Deployments can
-  # override `upstreamUrl` to point at a different node (a self-hosted
-  # ETC node, a paid RPC provider, etc.).
+  # Forward `<deploy-domain>/rpc/` to the classix-operated upstream.
+  # Wallet UI talks to this via the chain's `rpcUri`. Deployments can:
+  #   - override `upstreamUrl` to point at a different node (self-hosted
+  #     ETC node, paid RPC provider, etc.);
+  #   - disable the proxy (`rpcCorsProxy.enable = false`) and set the
+  #     chain's `rpcUri` directly at a CORS-friendly endpoint.
   rpcCorsProxy = {
     enable = true;
-    apexDomain = d;
-    tlsEnabled = cfg.tlsEnabled;
+    domain = d;
     upstreamUrl = lib.mkDefault "https://rpc.classix.dev";
   };
 }

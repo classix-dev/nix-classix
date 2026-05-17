@@ -36,7 +36,7 @@ Six pieces in `nix-classix`.
 
 `lib.chains.etc`. Attrset with the ETC chain definition: `chainId = 61`, RPC URI, block-explorer URL templates, native-currency metadata. Consumers spread it into `safe-multisig`'s `chains` option. Any new chain preset takes the same shape.
 
-`nixosModules.rpc-cors-proxy`. A reusable reverse-proxy module that adds CORS headers on top of a JSON-RPC upstream. Decoupled from `safe-multisig`. Used by the classix flavor to forward `rpc.<domain>` to the classix-operated RPC endpoint; importable on its own by any dApp host that needs the same dance.
+`nixosModules.rpc-cors-proxy`. A reusable nginx-location module that adds CORS headers on top of a JSON-RPC upstream. Adds a `location` block to an existing vhost (the consumer's apex), so no extra DNS record or cert beyond the apex is needed. Decoupled from `safe-multisig`. Used by the classix flavor to forward `<domain>/rpc/` to the classix-operated RPC endpoint; importable on its own by any dApp host that needs the same dance.
 
 `nixosModules.flavors.classix`. The composition: imports `safe-multisig` and `rpc-cors-proxy`, wires `branding.pack` to the classix brand pack, sets `chains.etc` from `lib`, sets `primaryChain = "etc"`, sets the theme colours, and enables the RPC CORS proxy with `upstreamUrl = "https://rpc.classix.dev"` as the default. Platform-agnostic. The private `classix-deployments` repo composes this with a `platforms.<provider>` module of choice and adds per-deploy identity (domain, ACME email, SSH keys, timezone, notification banner).
 
