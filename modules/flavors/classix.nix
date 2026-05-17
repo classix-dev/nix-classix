@@ -30,7 +30,7 @@ in
     chains.etc = etcChain;
     staticAssets = ../../packages/classix-brand-pack/assets;
     branding = {
-      appName = lib.mkDefault "Classix Multisig";
+      appName = lib.mkDefault "Safe Multisig";
       pack = classixBrandPack;
       theme = {
         textColor = "#ddffdc";
