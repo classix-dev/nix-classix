@@ -1,7 +1,7 @@
 # Classix brand pack. Returns an attrset matching `branding.pack` on the
 # safe-multisig module (`{ patches, postPatch, extraEnv }`). Consumers
 # wire it via `safeMultisig.branding.pack = nix-classix.lib.brandPacks.classix { };`
-# or via the `flavors.classix` composition (which does this for them).
+# or via the `flavor-classix` composition (which does this for them).
 #
 # What the pack adds:
 #   - 0001-classix-branding.patch: React/CSS changes to the upstream

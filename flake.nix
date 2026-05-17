@@ -140,10 +140,14 @@
           };
         };
 
-        # Idiomatic consumption: import `flavors.classix` for a fully
-        # wired classix-on-DigitalOcean deploy and set per-deploy
-        # identity, or import `safe-multisig` + `platforms.<provider>`
-        # individually and wire chains/branding/RPC yourself.
+        # Idiomatic consumption: in your own flake's nixosConfigurations,
+        # import `flavor-classix` (chain + brand + RPC) plus the
+        # `platform-<provider>` module for your cloud (just
+        # `platform-digital-ocean` today), and set per-deploy identity
+        # via `safeMultisig.*`. Flavor and platform are orthogonal axes;
+        # both have to be composed by the consumer. For a custom stack
+        # without our opinions, import `safe-multisig` + a platform
+        # module and wire chains / brand / RPC yourself.
         nixosModules =
           let
             withArgs = mod: _: {
