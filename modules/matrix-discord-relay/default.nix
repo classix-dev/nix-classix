@@ -159,6 +159,20 @@ in
         serve_server_wellknown = true;
         enable_registration = false;
 
+        # Reliability over latency, this box bridges one important room
+        # and has no traffic to protect. A slow first make_join to a
+        # big busy server (matrix.org) would otherwise time out at the
+        # ~20s default and get the destination locked out for 10
+        # minutes, which strands the bridge until someone intervenes.
+        # Give federation requests a generous ceiling and cap the
+        # per-destination backoff so any transient stall self-heals
+        # within minutes instead of hours.
+        federation = {
+          client_timeout = "120s";
+          destination_min_retry_interval = "1m";
+          destination_max_retry_interval = "10m";
+        };
+
         # Bound media growth. Synapse purges by last-access time, so
         # active media survives and only untouched files age out.
         # remote is cached copies of other servers' media (re-fetchable,
