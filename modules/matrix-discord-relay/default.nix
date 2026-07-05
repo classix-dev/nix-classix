@@ -15,6 +15,11 @@
 # keeps its default sqlite db, a single plumbed room does not need
 # more.
 #
+# Storage is bounded so the box does not fill over time: the
+# synapse-auto-compressor compacts the state_groups_state table
+# weekly, and media_retention ages out media after 180 days. Journald
+# self-caps at the systemd default, message history is kept.
+#
 # Secrets never touch the nix store. The appservice tokens are
 # generated on first boot by the nixpkgs mautrix-discord registration
 # unit, the avatar-proxy signing key by a oneshot below, and the
@@ -154,6 +159,17 @@ in
         serve_server_wellknown = true;
         enable_registration = false;
 
+        # Bound media growth. Synapse purges by last-access time, so
+        # active media survives and only untouched files age out.
+        # remote is cached copies of other servers' media (re-fetchable,
+        # safe to drop), local is media the bridge uploads for
+        # Discord-origin content (permanent loss past the window, shows
+        # broken in deep scrollback). Message history is untouched.
+        media_retention = {
+          local_media_lifetime = "180d";
+          remote_media_lifetime = "180d";
+        };
+
         database = {
           name = "psycopg2";
           # Peer auth over the local socket, the synapse unit runs as
@@ -184,6 +200,12 @@ in
         ];
       };
     };
+
+    # Compacts state_groups_state weekly, the table that otherwise
+    # grows without bound from membership churn in a busy federated
+    # room. Derives its postgres connection from the synapse database
+    # args above (local socket, peer auth as matrix-synapse).
+    services.synapse-auto-compressor.enable = true;
 
     services.mautrix-discord = {
       enable = true;
