@@ -165,8 +165,14 @@
             safe-multisig = mkSafeMultisig;
             default = mkSafeMultisig;
             platform-digital-ocean = ./modules/platforms/digital-ocean;
+            platform-hetzner-cloud = ./modules/platforms/hetzner/cloud.nix;
             rpc-cors-proxy = ./modules/rpc-cors-proxy;
             flavor-classix = mkFlavorClassix;
+
+            # Matrix-Discord relay appliance: minimal Synapse hosting
+            # the mautrix-discord appservice, Caddy in front. Compose
+            # with a platform module in the consumer's deploy file.
+            matrix-discord-relay = ./modules/matrix-discord-relay;
           };
       };
     };
