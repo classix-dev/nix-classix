@@ -38,6 +38,44 @@ let
   # /var/lib/mautrix-discord ownership and this file is written by a
   # root oneshot before that user exists.
   envFile = "/var/lib/matrix-discord-relay/env";
+
+  # Minimal static page for browsers landing on the domain root, so
+  # the server explains itself instead of returning an empty response.
+  # Brand assets come from the classix brand pack.
+  indexHtml = pkgs.writeText "matrix-relay-index.html" ''
+    <!doctype html>
+    <html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${cfg.domain}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='6' fill='%2312ff80'/></svg>">
+    <style>
+      @font-face { font-family: 'Michroma'; src: url('/fonts/Michroma-latin.woff2') format('woff2'); font-display: swap; }
+      @font-face { font-family: 'Space Grotesk'; src: url('/fonts/SpaceGrotesk-latin.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
+      :root { color-scheme: dark; }
+      body { margin: 0; background: #000; color: #e6e6e6; font: 17px/1.6 'Space Grotesk', system-ui, sans-serif;
+             min-height: 100vh; display: grid; place-items: center; }
+      main { text-align: center; padding: 2rem; }
+      h1 { font-family: Michroma, 'Space Grotesk', system-ui, sans-serif; font-size: 1.3rem; color: #12ff80;
+           letter-spacing: .04em; margin: 0 0 .75rem; overflow-wrap: anywhere; }
+      p { margin: .25rem 0; color: #9a9a9a; }
+      a { color: #12ff80; }
+    </style>
+    </head>
+    <body><main>
+    <h1>${cfg.domain}</h1>
+    <p>A Matrix to Discord relay.</p>
+    <p>Run by <a href="https://classix.dev">classix.dev</a></p>
+    </main></body></html>
+  '';
+
+  landingPage = pkgs.runCommand "matrix-relay-landing" { } ''
+    mkdir -p $out/fonts
+    cp ${../../packages/classix-brand-pack/fonts/Michroma-latin.woff2} $out/fonts/Michroma-latin.woff2
+    cp ${../../packages/classix-brand-pack/fonts/SpaceGrotesk-latin.woff2} $out/fonts/SpaceGrotesk-latin.woff2
+    cp ${indexHtml} $out/index.html
+  '';
 in
 {
   options.matrixDiscordRelay = {
@@ -169,7 +207,10 @@ in
 
             # Everyone federated gets relayed through the webhook, only
             # the listed admins can drive the bot.
-            permissions = { "*" = "relay"; } // lib.genAttrs cfg.admins (_: "admin");
+            permissions = {
+              "*" = "relay";
+            }
+            // lib.genAttrs cfg.admins (_: "admin");
           };
         };
     };
@@ -199,12 +240,15 @@ in
       email = cfg.acmeEmail;
       # Caddy sorts same-directive matchers by path length, so the
       # bridge and well-known prefixes win over the /_matrix catch-all
-      # regardless of order here.
+      # regardless of order here. Anything outside the Matrix paths
+      # falls through to the static landing page.
       virtualHosts.${cfg.domain}.extraConfig = ''
         encode gzip
+        root * ${landingPage}
         reverse_proxy /mautrix-discord/* 127.0.0.1:${toString bridgePort}
         reverse_proxy /.well-known/matrix/* 127.0.0.1:${toString synapsePort}
         reverse_proxy /_matrix/* 127.0.0.1:${toString synapsePort}
+        file_server
       '';
     };
 
