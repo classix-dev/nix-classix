@@ -23,6 +23,7 @@
 # onboarding runbook.
 {
   config,
+  options,
   lib,
   pkgs,
   ...
@@ -136,32 +137,41 @@ in
       environmentFile = envFile;
       serviceDependencies = [ "matrix-discord-relay-env.service" ];
 
-      settings = {
-        homeserver = {
-          address = "http://127.0.0.1:${toString synapsePort}";
-          inherit (cfg) domain;
-        };
+      # The nixpkgs module declares each settings section (homeserver,
+      # bridge, ...) as a leaf attrs option, so defining any key in a
+      # section throws away that section's entire default (which holds
+      # required values like username_template and command_prefix).
+      # Layer our values over the declared defaults instead. Priority
+      # wrappers (mkForce etc.) must not appear inside these attrsets,
+      # the freeform yaml type serializes them literally.
+      settings =
+        let
+          defaults =
+            section: (options.services.mautrix-discord.settings.type.getSubOptions [ ]).${section}.default;
+        in
+        {
+          homeserver = defaults "homeserver" // {
+            address = "http://127.0.0.1:${toString synapsePort}";
+            inherit (cfg) domain;
+          };
 
-        appservice = {
-          address = "http://127.0.0.1:${toString bridgePort}";
-          hostname = "127.0.0.1";
-          port = bridgePort;
-        };
+          # The appservice section keeps the module defaults (loopback
+          # registration endpoint, sqlite db, @discordbot bot user).
+          # bridgePort above must match its default port.
 
-        bridge = {
-          # Webhook relaying needs a public https address Discord can
-          # fetch per-message avatars from. Caddy routes the
-          # /mautrix-discord path prefix to the bridge.
-          public_address = "https://${cfg.domain}";
-          # Substituted from envFile by the module's envsubst pass.
-          avatar_proxy_key = "$AVATAR_PROXY_KEY";
+          bridge = lib.recursiveUpdate (defaults "bridge") {
+            # Webhook relaying needs a public https address Discord can
+            # fetch per-message avatars from. Caddy routes the
+            # /mautrix-discord path prefix to the bridge.
+            public_address = "https://${cfg.domain}";
+            # Substituted from envFile by the module's envsubst pass.
+            avatar_proxy_key = "$AVATAR_PROXY_KEY";
 
-          # Everyone federated gets relayed through the webhook, only
-          # the listed admins can drive the bot. mkForce so no default
-          # example entries survive the merge.
-          permissions = lib.mkForce ({ "*" = "relay"; } // lib.genAttrs cfg.admins (_: "admin"));
+            # Everyone federated gets relayed through the webhook, only
+            # the listed admins can drive the bot.
+            permissions = { "*" = "relay"; } // lib.genAttrs cfg.admins (_: "admin");
+          };
         };
-      };
     };
 
     # The avatar proxy key signs the avatar URLs handed to Discord so
