@@ -183,6 +183,11 @@
             nethermind-etc = ./modules/nethermind-etc;
             rpc-gateway = ./modules/rpc-gateway;
 
+            # Plane project management (community edition): upstream's
+            # docker images behind the host Caddy. Compose with a
+            # platform module in the consumer's deploy file.
+            plane = ./modules/plane;
+
             # Matrix-Discord relay appliance: minimal Synapse hosting
             # the mautrix-discord appservice, Caddy in front. Compose
             # with a platform module in the consumer's deploy file.
