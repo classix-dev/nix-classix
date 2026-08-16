@@ -393,9 +393,18 @@ in
       }))
     ];
 
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0750 root root -"
-      "d ${cfg.dataDir}/logs 0750 root root -"
+    # Every bind-mount source must exist up front; podman errors on
+    # missing host paths rather than creating them.
+    systemd.tmpfiles.rules = map (d: "d ${cfg.dataDir}${d} 0750 root root -") [
+      ""
+      "/postgres"
+      "/redis"
+      "/rabbitmq"
+      "/uploads"
+      "/logs"
+      "/logs/api"
+      "/logs/worker"
+      "/logs/beat"
     ];
 
     # Same routing as upstream's plane-proxy Caddyfile.ce. Caddy sorts

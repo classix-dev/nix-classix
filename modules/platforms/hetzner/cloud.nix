@@ -7,6 +7,12 @@
 # Patterns from srvos `hardware-hetzner-cloud` and the LGUG2Z
 # nixos-hetzner-cloud-starter, trimmed to what a disko-provisioned
 # box needs. ARM (CAX) instances boot UEFI-only and are not covered.
+#
+# Detach Hetzner Volumes before running nixos-anywhere. Both the local
+# disk and volumes are SCSI, and in the kexec installer a volume can
+# enumerate as /dev/sda, which hands it the whole install (the hq
+# deploy learned this the hard way). Attach volumes only once the box
+# is booted into NixOS from its local disk.
 {
   config,
   lib,
