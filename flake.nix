@@ -87,6 +87,13 @@
             src = inputs.safe-wallet-monorepo;
           };
 
+          # Nethermind + ETC plugin release bundle and the JSON-RPC
+          # gateway proxy. Consumed by `modules/nethermind-etc` and
+          # `modules/rpc-gateway` but exposed as packages too, so
+          # `nix build .#nethermind-etc` / `.#proxyd` work standalone.
+          packages.nethermind-etc = pkgs.callPackage ./packages/nethermind-etc { };
+          packages.proxyd = pkgs.callPackage ./packages/proxyd { };
+
           # Treefmt's wrapper already runs nixfmt + statix + deadnix in
           # fail-on-change mode, and the pre-commit hook re-runs them on
           # commit. Standalone `statix` / `deadnix` derivations would
@@ -166,8 +173,15 @@
             default = mkSafeMultisig;
             platform-digital-ocean = ./modules/platforms/digital-ocean;
             platform-hetzner-cloud = ./modules/platforms/hetzner/cloud.nix;
+            platform-hetzner-dedicated = ./modules/platforms/hetzner/dedicated.nix;
             rpc-cors-proxy = ./modules/rpc-cors-proxy;
             flavor-classix = mkFlavorClassix;
+
+            # ETC RPC node stack: Nethermind + coop plugin behind a
+            # Caddy + proxyd gateway. Compose both with a platform
+            # module in the consumer's deploy file.
+            nethermind-etc = ./modules/nethermind-etc;
+            rpc-gateway = ./modules/rpc-gateway;
 
             # Matrix-Discord relay appliance: minimal Synapse hosting
             # the mautrix-discord appservice, Caddy in front. Compose
