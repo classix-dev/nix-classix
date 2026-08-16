@@ -394,8 +394,11 @@ in
     ];
 
     # Every bind-mount source must exist up front; podman errors on
-    # missing host paths rather than creating them.
-    systemd.tmpfiles.rules = map (d: "d ${cfg.dataDir}${d} 0750 root root -") [
+    # missing host paths rather than creating them. Attributes stay
+    # "-": tmpfiles re-applies explicit mode/owner to EXISTING dirs on
+    # every switch, which yanked postgres's datadir to root:root mid
+    # migration once. The container entrypoints chown their own dirs.
+    systemd.tmpfiles.rules = map (d: "d ${cfg.dataDir}${d} - - - -") [
       ""
       "/postgres"
       "/redis"
